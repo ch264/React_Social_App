@@ -42,7 +42,7 @@ app.post('/shout', (req, res) => {
 	const newShout = {
 		body: req.body.body,
 		userHandle: req.body.userHandle,
-		createdAt: new Date().toISOString()
+		createdAt: new Date().toISOString() // string instead of timestamp
 	};
 
 	admin
