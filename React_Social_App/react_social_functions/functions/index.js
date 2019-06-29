@@ -26,26 +26,28 @@ app.get('/shouts', (req, res) => { // first argument is name of route and the se
 
 
 // creates firebase document
-exports.createShout = functions.https.onRequest((req, res) => {
-	if(req.method !== 'POST'){
-		return res.status(400).json({error: 'Method not allowed, client error'})
-	}
+app.post('/shout', (req, res) => {
+	
 	const newShout = {
 		body: req.body.body,
 		userHandle: req.body.userHandle,
 		createdAt: admin.firestore.Timestamp.fromDate(new Date())
 	};
-	// add takes json object and adds it to the the database
-	admin.firestore().collection('shouts').add(newShout).then(doc => {
-		res.json({ message: `document ${doc.id} created successfully`})
-		.catch(err => {
-			res.status(500).json({error: `something went wrong`});
-			console.error(err);
-		})
-	})
-})
+
+	admin
+	.firestore()
+	.collection('shouts')
+	.add(newShout) // add takes json object and adds it to the the database
+	.then((doc) => {
+		res.json({ message: `document ${doc.id} created successfully`});
+	}).catch((err) => {
+		res.status(500).json({ error: `something went wrong` });
+		console.error(err);
+	});
+});
+
 
 // best practices for API: https://baseurl.com/api/....
 
-// tell app that app is the container for all routes in it
-exports.api = functions.https.onRequest(app)
+// tell the app that app is the container for all routes in it
+exports.api = functions.https.onRequest(app);
