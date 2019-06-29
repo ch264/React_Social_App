@@ -18,6 +18,7 @@ app.get('/shouts', (req, res) => { // first argument is name of route and the se
 	admin
 	.firestore()
 	.collection('shouts')
+	.orderBy('createdAt', 'desc')
 	.get()
 	.then((data) => {
 		let shouts = [];
@@ -41,7 +42,7 @@ app.post('/shout', (req, res) => {
 	const newShout = {
 		body: req.body.body,
 		userHandle: req.body.userHandle,
-		createdAt: admin.firestore.Timestamp.fromDate(new Date())
+		createdAt: new Date().toISOString()
 	};
 
 	admin
