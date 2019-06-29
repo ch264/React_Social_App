@@ -2,7 +2,12 @@ const functions = require('firebase-functions');
 
 // import admin SDK for access to database
 const admin = require('firebase-admin');
-admin.initializeApp();
+
+const firebaseConfig = require('./config.js')
+
+
+admin.initializeApp(firebaseConfig);
+
 
 // import express
 const express = require('express');
@@ -17,7 +22,12 @@ app.get('/shouts', (req, res) => { // first argument is name of route and the se
 	.then((data) => {
 		let shouts = [];
 		data.forEach((doc) => {
-			shouts.push(doc.data()); // data() is function that returns data inside the document
+			shouts.push({
+				screamId: doc.id,
+				body: doc.data().body,
+				userHandle: doc.data().userHandle,
+				createdAt: doc.data.createdAt
+			}); // data() is function that returns data inside the document
 		});
 		return res.json(shouts); // return as json
 	})
@@ -51,3 +61,7 @@ app.post('/shout', (req, res) => {
 
 // tell the app that app is the container for all routes in it
 exports.api = functions.https.onRequest(app);
+
+
+
+
