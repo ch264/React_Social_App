@@ -1,27 +1,29 @@
 const functions = require('firebase-functions');
+
 // import admin SDK for access to database
 const admin = require('firebase-admin');
-
 admin.initializeApp();
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello World!");
-});
+
+// import express
+const express = require('express');
+const app = express();
 
 // get documents(data) from firebase
-exports.getShouts = functions.https.onRequest((req, res) => {
-	admin.firestore().collection('shouts').get()
-	.then(data => {
+app.get('/shouts', (req, res) => { // first argument is name of route and the second is the handler
+	admin
+	.firestore()
+	.collection('shouts')
+	.get()
+	.then((data) => {
 		let shouts = [];
-		data.forEach(doc => {
-			shouts.push(doc.data()); // data() is function that returns data inside the document.
-		}) 
+		data.forEach((doc) => {
+			shouts.push(doc.data()); // data() is function that returns data inside the document
+		});
 		return res.json(shouts); // return as json
 	})
 	.catch(err => console.error(err))
-})
+});
+
 
 // creates firebase document
 exports.createShout = functions.https.onRequest((req, res) => {
@@ -42,3 +44,8 @@ exports.createShout = functions.https.onRequest((req, res) => {
 		})
 	})
 })
+
+// best practices for API: https://baseurl.com/api/....
+
+// tell app that app is the container for all routes in it
+exports.api = functions.https.onRequest(app)
