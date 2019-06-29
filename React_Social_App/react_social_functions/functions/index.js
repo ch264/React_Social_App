@@ -4,19 +4,31 @@ const functions = require('firebase-functions');
 const express = require('express');
 const app = express();
 
+
 // import admin SDK for access to database
 const admin = require('firebase-admin');
 // store the database in variable db
-const db = admin.firestore();
-// admin.initializeApp();
+admin.initializeApp();
+
+var firebaseConfig = {
+	apiKey: "AIzaSyCNn89uzWO9UmdHVO-o6_mWtNptJ2vMmaw",
+	authDomain: "socialapp-9fdae.firebaseapp.com",
+	databaseURL: "https://socialapp-9fdae.firebaseio.com",
+	projectId: "socialapp-9fdae",
+	storageBucket: "socialapp-9fdae.appspot.com",
+	messagingSenderId: "150912081800",
+	appId: "1:150912081800:web:9df1c8b1db3a1762"
+};
 
 
 // import firebase and initialise
-const firebaseConfig = require('./config.js')
+// const firebaseConfig = require('./config.js')
 const firebase = require('firebase');
 firebase.initializeApp(firebaseConfig);
-admin.initializeApp();
+// admin.initializeApp();
 
+const db = admin.firestore();
+// admin.initializeApp();
 
 
 // get documents(data) from firebase
@@ -74,6 +86,8 @@ app.post('/signup', (req, res) => {
 	};
 
 	// TODO: validate data
+	let token;
+	let userId; // declare token and userId so we can use it
 
 	db.doc(`/users/${newUser.handle}`)
 	.get()
@@ -85,16 +99,31 @@ app.post('/signup', (req, res) => {
 		}
 	})
 	.then((data) => { // data gives us access to user
+		userId = data.user.uid
 		return data.user.getIdToken()
 	})
 	.then((token) => {
-		return res.status(201).json({ token }) // same name twice so can write it once
+		token = token; // toekn is returned
+		const userCredentials = {
+			handle: newUser.handle,
+			email: newUser.email,
+			createdAt: new Date().toISOString(),
+			userId: userId
+		}
+		return db.doc(`/users/&{newUser.handle}`).set(userCredentials) // set creates document
+	})
+	.then(() => {
+		return res.status(201).json({ token });
 	})
 	.catch((err) => {
-		console.error(err)
+		console.error(err);
+		if (err.code === 'auth/email-already-in-use'){
+			return res.status(400).json({ email: 'Email is already in use' });
+		} else {
 		return res.status(500).json({ error: err.code })
-	})
-}); 
+		}
+	});
+// }); 
 
 	firebase
 	.auth()
@@ -111,8 +140,7 @@ app.post('/signup', (req, res) => {
 			.json({ json: err.code});
 	})
 
-
-
+}); 
 
 
 
